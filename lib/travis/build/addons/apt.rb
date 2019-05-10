@@ -84,7 +84,7 @@ module Travis
         end
 
         def skip_safelist?
-          Travis::Build.config.apt_safelist_skip?
+          Travis::Build.config.apt_safelist_skip
         end
 
         def before_configure?
@@ -107,7 +107,7 @@ module Travis
             sh.cmd "sudo mv #{tmp_dest} ${TRAVIS_ROOT}/etc/apt/apt.conf.d"
           end
         end
-        
+
         def config
           @config ||= Hash(super)
         end
