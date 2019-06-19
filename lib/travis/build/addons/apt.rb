@@ -170,6 +170,10 @@ module Travis
                   sh.cmd "echo #{sourceline.inspect} | sudo tee -a ${TRAVIS_ROOT}/etc/apt/sources.list >/dev/null", echo: true, assert: true, timing: true
                 end
               end
+
+              if config[:update]
+                sh.cmd 'travis_apt_get_update', retry: true, echo: true, timing: true
+              end
             end
           end
 
@@ -206,7 +210,10 @@ module Travis
                 stop_postgresql
               end
 
-              sh.cmd 'travis_apt_get_update', retry: true, echo: true, timing: true
+              unless config[:update]
+                # this is run elsewhere when sources are added
+                sh.cmd 'travis_apt_get_update', retry: true, echo: true, timing: true
+              end
               sh.raw bash('travis_apt_get_options')
               command = 'sudo -E apt-get -yq --no-install-suggests --no-install-recommends ' \
                 "$(travis_apt_get_options) install #{safelisted.join(' ')}"

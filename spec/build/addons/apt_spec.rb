@@ -266,7 +266,7 @@ describe Travis::Build::Addons::Apt, :sexp do
 
     context 'when apt source aliases are not loaded' do
       let(:apt_load_source_alias_list) { false }
-      let(:apt_config) { { sources: ['packagecloud-xenial', 'deadsnakes-xenial', 'evilbadthings', 'ppa:archivematica/externals', { sourceline: 'foobar' }] } }
+      let(:apt_config) { { update: true, sources: ['packagecloud-xenial', 'deadsnakes-xenial', 'evilbadthings', 'ppa:archivematica/externals', { sourceline: 'foobar' }] } }
 
       it { should include_sexp [:echo, "Skipping loading APT source aliases list", ansi: :yellow] }
       it { should_not include_sexp [:echo, /^Disallowing sources: foobar/, ansi: :red] }
@@ -274,6 +274,12 @@ describe Travis::Build::Addons::Apt, :sexp do
       it { should include_sexp [:cmd, apt_sources_append_command('foobar'), echo: true, assert: true, timing: true] }
       it { should_not include_sexp [:cmd, apt_sources_append_command(packagecloud['sourceline']), echo: true, assert: true, timing: true] }
       it { should_not include_sexp [:cmd, apt_add_repository_command(deadsnakes['sourceline']), echo: true, assert: true, timing: true] }
+    end
+
+    context "when update is true" do
+      let(:apt_config) { { sources: ['deadsnakes-xenial'], update: true } }
+
+      it { should include_sexp [:cmd, 'travis_apt_get_update', retry: true, echo: true, timing: true] }
     end
   end
 
