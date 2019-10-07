@@ -28,6 +28,10 @@ describe Travis::Build::Script::Rust, :sexp do
     should include_sexp [:cmd, 'cargo --version', assert: true, echo: true]
   end
 
+  it 'runs rustup update' do
+    should include_sexp [:cmd, 'rustup update', echo: true, timing: true, assert: true]
+  end
+
   it 'runs cargo test' do
     should include_sexp [:cmd, 'cargo test --verbose', echo: true, timing: true]
   end
@@ -59,6 +63,14 @@ describe Travis::Build::Script::Rust, :sexp do
 
     it 'removes $HOME/.cargo/registry/src' do
       should include_sexp [:cmd, 'rm -rf "$HOME/.cargo/registry/src"']
+    end
+
+    context "when on macOS" do
+      let(:data)   { payload_for(:push, :rust, config: { os: 'osx', cache: 'cargo' }, cache_options: options) }
+
+      it 'caches desired directories' do
+        should include_sexp [:cmd, %r[rvm \$\(travis_internal_ruby\) --fuzzy do \$CASHER_DIR/bin/casher --name cache-osx-[0-9a-f]+--cargo-stable cache add \$\{TRAVIS_HOME\}/.cargo target \$\{TRAVIS_HOME\}/.rustup \$\{TRAVIS_HOME\}/Library/Caches/Mozilla\.sccache], timing: true]
+      end
     end
   end
 end
